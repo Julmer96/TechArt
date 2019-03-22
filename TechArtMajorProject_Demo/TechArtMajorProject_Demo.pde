@@ -34,15 +34,17 @@ float displaySpeedRatio = 1.9;
 // Dimensions of images and borders.
 float xSpace = 10;
 float ySpace = 10;
-int imgWidth = 350;
-int imgHeight = 262;
+int imgWidth;
+int imgHeight;
+int numCols = 4;
+
 int captureWidth = 400;
 int captureHeight = 300;
 
-int numCols = 4;
-
 void setup() {
   fullScreen();
+  
+  // Set image width and image height to fit numCols images across the screen.
   imgWidth = int(float(width) / numCols - xSpace * float(numCols + 1) / numCols);
   imgHeight = int(float(height) * imgWidth / width);
 
