@@ -43,6 +43,9 @@ int numCols = 4;
 
 void setup() {
   fullScreen();
+  imgWidth = int(float(width) / numCols - xSpace * float(numCols + 1) / numCols);
+  imgHeight = int(float(height) * imgWidth / width);
+
   background(255);
   cam = new Capture(this, captureWidth, captureHeight, 1000/drawPeriod);
 
