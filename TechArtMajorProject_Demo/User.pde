@@ -2,21 +2,22 @@ class User {
   PImage imgs[];
   int currImgIdx;
   int lastDrawn;
-  int num_imgs;
+  int numImgs;
   Rectangle boundingRect;
   Rectangle faces[];
   boolean consented;
   
-  User(Rectangle _boundingRect, int _num_imgs) {
+  User(Rectangle _boundingRect, int _numImgs, int _drawPeriod) {
     boundingRect = _boundingRect;
-    num_imgs = _num_imgs;
+    numImgs = _numImgs;
+    drawPeriod = _drawPeriod;
 
     currImgIdx = 0;
     lastDrawn = millis();
 
-    imgs = new PImage[num_imgs];
-    faces = new Rectangle[num_imgs];
-    for (int imgId = 0; imgId < num_imgs; imgId++) {
+    imgs = new PImage[numImgs];
+    faces = new Rectangle[numImgs];
+    for (int imgId = 0; imgId < numImgs; imgId++) {
       imgs[imgId] = new PImage();
       faces[imgId] = null;
     }
@@ -25,9 +26,10 @@ class User {
   void loadImages(PImage imgBuff[], boolean _consented) {
 
     consented = _consented;
+    lastDrawn = millis() - drawPeriod;
     
     // This loop saves every image in the buffer to the appropriate cache.
-    for (int imgId = 0; imgId < num_imgs; imgId++) {
+    for (int imgId = 0; imgId < numImgs; imgId++) {
   
       if (imgBuff[imgId] == null) {
         println("Error: No images in buffer yet");
@@ -74,7 +76,7 @@ class User {
     }
   }
   
-  void drawUser(float drawPeriod) {
+  void drawUser() {
     if (millis() - lastDrawn >= drawPeriod) {
       // Draw the image.
       image(imgs[currImgIdx], boundingRect.x, boundingRect.y);
@@ -89,7 +91,7 @@ class User {
       }
     
       // Update the data for this cache.
-      currImgIdx = (currImgIdx+1) % num_imgs;
+      currImgIdx = (currImgIdx+1) % numImgs;
       lastDrawn = lastDrawn + int(drawPeriod);
     }
   }

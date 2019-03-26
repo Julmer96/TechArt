@@ -4,12 +4,12 @@ import java.awt.*;
 
 // We have one cache per person.
 // Each cache contains a number of images that we loop through.
-int NUM_USERS = 8;
 int NUM_IMGS_PER_USERS = 6;
 User users[];
+int numUsers;
 int userCount;
 
-int numCols = 4;
+String framesFileName = "data/frames.txt";
 
 // The image buffer contains the last few frames that were taken by the camera ('cam').
 // This buffer is copied into the correct image cache when 'y' or 'n' is clicked.
@@ -18,15 +18,26 @@ int bufferLocation = 0;
 Capture cam;
 OpenCV opencv;
 
-// Draw period contains the number of milliseconds between each subsequent frame in the cache.
+// Number of milliseconds between capturing frames
 int capturePeriod = 250;
 int lastCapture;
 
-// Number of times slower that images are displayed than they are taken.
-float displaySpeedRatio = 1.9;
+// Number of milliseconds between drawing frames
+int drawPeriod = 475;
 
 int captureWidth = 640;
 int captureHeight = 480;
+
+Rectangle[] readRectFromFile(String filename) {
+  String[] lines = loadStrings(filename);
+  Rectangle[] rects = new Rectangle[lines.length];
+
+  for (int i = 0; i < lines.length; i++) {
+    String[] data = lines[i].split(", ");
+    rects[i] = new Rectangle(int(data[0]),int(data[1]),int(data[2]),int(data[3]));
+  }
+  return rects;
+}
 
 void setup() {
   fullScreen();
@@ -35,7 +46,7 @@ void setup() {
   opencv = new OpenCV(this, captureWidth, captureHeight);
   opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);
 
-  cam = new Capture(this, captureWidth, captureHeight);
+  cam = new Capture(this, captureWidth, captureHeight, 1000/capturePeriod);
   cam.start();
   lastCapture = millis();
   
@@ -45,19 +56,12 @@ void setup() {
     imgBuff[i] = null;
   }
   
-  // Set image width and image height to fit numCols images across the screen.
-  int imgWidth = width / numCols;
-  int imgHeight = height / numCols;
-  
   // Initialize the cache data
-  users = new User[NUM_USERS];
-  for (int userId = 0; userId < NUM_USERS; userId++) {
-    // Determine where to draw the image.
-    int x = (userId % numCols) * imgWidth;
-    int y = (userId / numCols) * imgHeight;
-    Rectangle boundingRect = new Rectangle(x, y, imgWidth, imgHeight);
-
-    users[userId] = new User(boundingRect, NUM_IMGS_PER_USERS);
+  Rectangle[] boundingRects = readRectFromFile(framesFileName);
+  numUsers = boundingRects.length;
+  users = new User[numUsers];
+  for (int userId = 0; userId < numUsers; userId++) {
+    users[userId] = new User(boundingRects[userId], NUM_IMGS_PER_USERS, drawPeriod);
   }
 
   userCount = 0;
@@ -79,7 +83,7 @@ void keyPressed() {
     println("Error: Invalid key press");
     return;
   }
-  int userId = userCount % NUM_USERS;
+  int userId = userCount % numUsers;
   boolean consented = key == 'y';
 
   users[userId].loadImages(imgBuff, consented);
@@ -87,7 +91,7 @@ void keyPressed() {
 }
 
 void draw() {
-  for (int i = 0; i < NUM_USERS; i++) {
-    users[i].drawUser(displaySpeedRatio * capturePeriod);
+  for (int i = 0; i < numUsers; i++) {
+    users[i].drawUser();
   }
 }
