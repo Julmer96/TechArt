@@ -9,7 +9,8 @@ User users[];
 int numUsers;
 int userCount;
 
-String framesFileName = "data/frames.txt";
+String[] firstWords;
+String[] secondWords;
 
 // The image buffer contains the last few frames that were taken by the camera ('cam').
 // This buffer is copied into the correct image cache when 'y' or 'n' is clicked.
@@ -56,8 +57,11 @@ void setup() {
     imgBuff[i] = null;
   }
   
+  firstWords = loadStrings("data/1st.txt");
+  secondWords = loadStrings("data/2nd.txt");
+  
   // Initialize the cache data
-  Rectangle[] boundingRects = readRectFromFile(framesFileName);
+  Rectangle[] boundingRects = readRectFromFile("data/frames.txt");
   numUsers = boundingRects.length;
   users = new User[numUsers];
   for (int userId = 0; userId < numUsers; userId++) {
@@ -86,7 +90,8 @@ void keyPressed() {
   int userId = userCount % numUsers;
   boolean consented = key == 'y';
 
-  users[userId].loadImages(imgBuff, consented);
+  String str = firstWords[int(random(firstWords.length))]+secondWords[int(random(secondWords.length))];
+  users[userId].loadImages(imgBuff, consented, str);
   userCount++;
 }
 
